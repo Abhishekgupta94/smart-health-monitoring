@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results - Smart Health Monitoring</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+                <i class="fas fa-heartbeat"></i> Smart Health Monitoring
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('history') }}">
+                            <i class="fas fa-history"></i> History
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5 mb-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="text-center mb-4">
+                    <h2>Assessment Result</h2>
+                    <p class="text-muted">Generated on {{ prediction['timestamp'] }}</p>
+                </div>
+
+                {% if prediction['risk_level'] == 'Low Risk' %}
+                    <div class="card border-success shadow-lg mb-4">
+                        <div class="card-header bg-success text-white text-center py-4">
+                            <i class="fas fa-check-circle fa-3x mb-3"></i>
+                            <h3 class="mb-0">{{ prediction['risk_level'] }}</h3>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="text-center mb-4">
+                                <h4>Risk Probability: <span class="badge bg-success">{{ "%.2f"|format(prediction['probability'] * 100) }}%</span></h4>
+                            </div>
+                            <div class="alert alert-success">
+                                <h5><i class="fas fa-info-circle"></i> Lower estimated risk</h5>
+                                <p class="mb-0">Based on the submitted clinical values, this assessment indicates a lower estimated risk. Continue healthy habits and routine medical checkups.</p>
+                            </div>
+                        </div>
+                    </div>
+                {% elif prediction['risk_level'] == 'Medium Risk' %}
+                    <div class="card border-warning shadow-lg mb-4">
+                        <div class="card-header bg-warning text-dark text-center py-4">
+                            <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                            <h3 class="mb-0">{{ prediction['risk_level'] }}</h3>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="text-center mb-4">
+                                <h4>Risk Probability: <span class="badge bg-warning">{{ "%.2f"|format(prediction['probability'] * 100) }}%</span></h4>
+                            </div>
+                            <div class="alert alert-warning">
+                                <h5><i class="fas fa-info-circle"></i> Follow-up recommended</h5>
+                                <p class="mb-0">The submitted values suggest a moderate estimated risk. Monitor symptoms and discuss the result with a healthcare professional.</p>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="card border-danger shadow-lg mb-4">
+                        <div class="card-header bg-danger text-white text-center py-4">
+                            <i class="fas fa-exclamation-circle fa-3x mb-3"></i>
+                            <h3 class="mb-0">{{ prediction['risk_level'] }}</h3>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="text-center mb-4">
+                                <h4>Risk Probability: <span class="badge bg-danger">{{ "%.2f"|format(prediction['probability'] * 100) }}%</span></h4>
+                            </div>
+                            <div class="alert alert-danger">
+                                <h5><i class="fas fa-exclamation-triangle"></i> Prompt medical review advised</h5>
+                                <p class="mb-0">The submitted values indicate a high estimated risk. Please seek timely medical advice for further evaluation.</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-clipboard-list"></i> Clinical Parameters</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <strong>Age:</strong> {{ prediction['age'] }} years
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Sex:</strong> {{ prediction['sex_label'] }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Chest Pain Type:</strong> {{ prediction['cp_label'] }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Resting Blood Pressure:</strong> {{ prediction['trestbps'] }} mm Hg
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Cholesterol:</strong> {{ prediction['chol'] }} mg/dl
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Fasting Blood Sugar:</strong> {{ prediction['fbs_label'] }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Rest ECG:</strong> {{ prediction['restecg_label'] }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Max Heart Rate:</strong> {{ prediction['thalachh'] }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Exercise Induced Angina:</strong> {{ prediction['exang_label'] }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Oldpeak:</strong> {{ prediction['oldpeak'] }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Slope:</strong> {{ prediction['slope_label'] }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>CA (Major Vessels):</strong> {{ prediction['ca'] }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Thalassemia:</strong> {{ prediction['thal_label'] }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-notes-medical"></i> General Recommendations</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if prediction['risk_level'] == 'Low Risk' %}
+                            <ul class="recommendations-list">
+                                <li><i class="fas fa-check text-success"></i> Maintain a healthy lifestyle with regular exercise</li>
+                                <li><i class="fas fa-check text-success"></i> Continue balanced diet with low sodium and saturated fats</li>
+                                <li><i class="fas fa-check text-success"></i> Regular health checkups are recommended</li>
+                                <li><i class="fas fa-check text-success"></i> Keep monitoring blood pressure and cholesterol levels</li>
+                            </ul>
+                        {% elif prediction['risk_level'] == 'Medium Risk' %}
+                            <ul class="recommendations-list">
+                                <li><i class="fas fa-exclamation-circle text-warning"></i> Monitor blood pressure and cholesterol regularly</li>
+                                <li><i class="fas fa-exclamation-circle text-warning"></i> Consult with a cardiologist for detailed evaluation</li>
+                                <li><i class="fas fa-exclamation-circle text-warning"></i> Adopt heart-healthy diet and exercise routine</li>
+                                <li><i class="fas fa-exclamation-circle text-warning"></i> Consider stress management techniques</li>
+                                <li><i class="fas fa-exclamation-circle text-warning"></i> Avoid smoking and limit alcohol consumption</li>
+                            </ul>
+                        {% else %}
+                            <ul class="recommendations-list">
+                                <li><i class="fas fa-exclamation-triangle text-danger"></i> <strong>IMMEDIATE medical consultation is strongly recommended</strong></li>
+                                <li><i class="fas fa-exclamation-triangle text-danger"></i> Comprehensive cardiac evaluation required</li>
+                                <li><i class="fas fa-exclamation-triangle text-danger"></i> Lifestyle modifications are essential</li>
+                                <li><i class="fas fa-exclamation-triangle text-danger"></i> Regular monitoring of cardiac parameters</li>
+                                <li><i class="fas fa-exclamation-triangle text-danger"></i> Follow prescribed medication strictly</li>
+                                <li><i class="fas fa-exclamation-triangle text-danger"></i> Emergency contact: Keep cardiologist contact readily available</li>
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <a href="{{ url_for('download', prediction_id=prediction['id']) }}" class="btn btn-danger btn-lg mb-2">
+                        <i class="fas fa-file-pdf"></i> Download PDF Report
+                    </a>
+                    <a href="{{ url_for('predict') }}" class="btn btn-primary btn-lg mb-2">
+                        <i class="fas fa-redo"></i> New Assessment
+                    </a>
+                    <a href="{{ url_for('history') }}" class="btn btn-info btn-lg mb-2">
+                        <i class="fas fa-history"></i> View History
+                    </a>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary btn-lg mb-2">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                </div>
+
+                <div class="alert alert-info mt-4">
+                        <i class="fas fa-info-circle"></i>
+                    <strong>Medical disclaimer:</strong> This page shows an estimated risk generated by a machine learning model. It should be used for educational and screening purposes only.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
